@@ -1,0 +1,18 @@
+{
+  "name": "Habit Tracker",
+  "short_name": "Habits",
+  "description": "A simple, private habit tracker that keeps your data on your device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eee8dc",
+  "theme_color": "#1f292f",
+  "icons": [
+    {
+      "src": "habit-tracker-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

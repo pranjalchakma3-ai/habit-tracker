@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f292f" />
+    <title>Habit Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="habit-tracker-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="habit-tracker-icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <section class="brand-card">
+          <p class="eyebrow">PERSONAL DASHBOARD</p>
+          <h1>HABIT TRACKER</h1>
+          <div class="month-control">
+            <button id="previousMonth" aria-label="Previous month">‹</button>
+            <span id="monthTitle">January 2026</span>
+            <button id="nextMonth" aria-label="Next month">›</button>
+          </div>
+          <button id="installApp" class="install-button" type="button" hidden>⌄ Install app</button>
+        </section>
+
+        <section class="section-card calendar-card">
+          <h2>CALENDAR SETTINGS</h2>
+          <label>Month <input id="monthPicker" type="month" /></label>
+        </section>
+
+        <section class="habit-section">
+          <div class="section-heading">
+            <h2>My Habits</h2>
+            <button id="addHabit" class="icon-button" title="Add a habit">+</button>
+          </div>
+          <div id="habitList" class="habit-list"></div>
+          <p class="hint">Click a habit name to rename it. Hover for options.</p>
+        </section>
+      </aside>
+
+      <section class="dashboard">
+        <section class="top-grid">
+          <article class="panel overview-panel">
+            <div class="overview-header">
+              <div><p class="eyebrow">ACTIVITY OVERVIEW</p><h2 id="activityChartTitle">Daily activity</h2></div>
+              <div class="view-switcher" aria-label="Activity graph view">
+                <button class="view-button active" data-chart-view="daily" title="Daily activity" aria-label="Show daily activity">☀</button>
+                <button class="view-button" data-chart-view="weekly" title="Weekly activity" aria-label="Show weekly activity">◫</button>
+                <button class="view-button" data-chart-view="monthly" title="Monthly activity" aria-label="Show monthly activity">▥</button>
+              </div>
+            </div>
+            <div class="chart-context"><span id="activityChartDescription">How many habits you completed each day</span><strong id="activityChartStat">0 checks</strong></div>
+            <div id="activityChart" class="activity-chart" aria-live="polite" aria-label="Activity graph"></div>
+          </article>
+          <article class="panel habit-lines-panel">
+            <div class="panel-title-row"><div><p class="eyebrow">ALL ACTIVITIES</p><h2>Habit activity</h2></div><span class="summary-text">This month</span></div>
+            <div id="habitLines" class="habit-lines" aria-label="Individual habit graphs"></div>
+          </article>
+          <article class="panel donut-panel">
+            <h2>Overall Status</h2>
+            <div class="donut-content">
+              <div id="donut" class="donut"><span id="completionPercent">0%</span></div>
+              <div class="stat-list">
+                <div><span>Goal</span><strong id="goalCount">0</strong></div>
+                <div><span>Completed</span><strong id="completedCount">0</strong></div>
+                <div><span>Left</span><strong id="leftCount">0</strong></div>
+                <div class="streak-stat"><span>Current streak</span><strong id="streakCount">0 days</strong></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel tracker-panel">
+          <div class="tracker-toolbar">
+            <div><p class="eyebrow">MONTHLY VIEW</p><h2 id="trackerHeading">Your habits</h2></div>
+            <button id="clearMonth" class="text-button">Clear month</button>
+          </div>
+          <div id="trackerScroll" class="tracker-scroll"><div id="trackerGrid" class="tracker-grid"></div></div>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel checkin-panel">
+            <div class="panel-title-row"><h2>Daily check-in</h2><span class="summary-text">Rate today</span></div>
+            <div class="checkin-row"><span>Mood</span><div id="moodChoices" class="rating-choices"></div><strong id="moodValue">—</strong></div>
+            <div class="checkin-row"><span>Motivation</span><div id="motivationChoices" class="rating-choices"></div><strong id="motivationValue">—</strong></div>
+            <p class="checkin-note">Choose a score for today. Your latest check-in is saved locally.</p>
+          </article>
+          <article class="panel analysis-panel">
+            <div class="panel-title-row"><h2>Analysis</h2><span class="summary-text">Completion by habit</span></div>
+            <div id="analysisList" class="analysis-list"></div>
+          </article>
+          <article class="panel top-habits-panel">
+            <h2>Top habits</h2>
+            <ol id="topHabits" class="top-habits"></ol>
+          </article>
+        </section>
+      </section>
+    </main>
+    <dialog id="habitDialog">
+      <form id="habitForm">
+        <div class="dialog-heading"><h2 id="dialogTitle">New habit</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
+        <label>Habit name <input id="habitName" maxlength="32" placeholder="e.g. Read 10 pages" required autofocus /></label>
+        <label>Icon <input id="habitIcon" maxlength="3" placeholder="✨" /></label>
+        <section id="habitSuggestions" class="habit-suggestions" aria-label="Quick habit suggestions">
+          <p>Quick suggestions</p>
+          <div id="suggestionList" class="suggestion-list"></div>
+        </section>
+        <div class="dialog-actions"><button type="button" data-close-dialog class="secondary">Cancel</button><button id="saveHabit" type="submit">Save habit</button></div>
+      </form>
+    </dialog>
+    <div id="undoToast" class="undo-toast" role="status" aria-live="polite">
+      <span id="undoToastMessage">Habit deleted</span>
+      <button id="undoDelete" type="button">Undo</button>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
