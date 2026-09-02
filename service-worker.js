@@ -1,4 +1,4 @@
-const CACHE_NAME = "habit-tracker-v6";
+const CACHE_NAME = "habit-tracker-v7";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./firebase-sync.js", "./manifest.webmanifest", "./habit-tracker-icon.svg"];
 
 self.addEventListener("install", event => {
