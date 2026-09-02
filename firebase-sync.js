@@ -4,7 +4,6 @@ import {
   GoogleAuthProvider,
   getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
@@ -132,16 +131,10 @@ async function beginGoogleSignIn() {
   googleSignIn.classList.add("is-loading");
   showMessage("Opening Google sign-in…");
   try {
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
   } catch (error) {
-    if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment"].includes(error.code)) {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-    if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-      console.error("Google sign-in failed", error);
-      showMessage("Google sign-in is not ready yet. You can continue offline and try again later.", true);
-    }
+    console.error("Google sign-in failed", error);
+    showMessage("Google sign-in could not open. Please check your connection and try again.", true);
     googleSignIn.disabled = false;
     googleSignIn.classList.remove("is-loading");
   }
