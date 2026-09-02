@@ -27,6 +27,21 @@ const firebaseConfig = {
 
 const STORAGE_KEY = "simple-habit-tracker-v1";
 const OWNER_KEY = `${STORAGE_KEY}-owner`;
+
+function importGitHubTrackerState() {
+  try {
+    const transfer = JSON.parse(window.name || "null");
+    const transferredState = transfer?.source === "habit-tracker-github" ? JSON.parse(transfer.state) : null;
+    if (transferredState && Array.isArray(transferredState.habits)) {
+      localStorage.setItem(STORAGE_KEY, transfer.state);
+      window.name = "";
+    }
+  } catch {
+    // A malformed or unrelated window name is ignored.
+  }
+}
+
+importGitHubTrackerState();
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
