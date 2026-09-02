@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#172b2b" />
     <title>Habit Tracker</title>
+    <script>
+      if (location.hostname === "pranjalchakma3-ai.github.io") {
+        const destination = new URL("https://habit-tracker-sync-c7fc8.firebaseapp.com/");
+        destination.search = location.search;
+        destination.hash = location.hash;
+        location.replace(destination);
+      }
+    </script>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="habit-tracker-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="habit-tracker-icon.svg" />
