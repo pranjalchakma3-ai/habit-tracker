@@ -8,6 +8,8 @@
       "firebase.json",
       "firestore.rules",
       ".firebaserc",
+      ".git",
+      ".git/**",
       "**/.*",
       "**/node_modules/**"
     ]
