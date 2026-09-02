@@ -8,6 +8,10 @@
     <script>
       if (location.hostname === "pranjalchakma3-ai.github.io") {
         const destination = new URL("https://habit-tracker-sync-c7fc8.firebaseapp.com/");
+        const savedTracker = localStorage.getItem("simple-habit-tracker-v1");
+        if (savedTracker) {
+          window.name = JSON.stringify({ source: "habit-tracker-github", state: savedTracker });
+        }
         destination.search = location.search;
         destination.hash = location.hash;
         location.replace(destination);
