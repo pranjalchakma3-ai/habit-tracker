@@ -27,7 +27,6 @@ let activeChartView = "daily";
 let lastDeletedHabit = null;
 let deletionTimer = null;
 let installPrompt = null;
-let cloudSaveTimer = null;
 
 function uid() { return `h${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`; }
 function monthKey(date = state.month) { return date; }
@@ -42,12 +41,17 @@ function loadState() {
 function saveState(options = {}) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   if (options.sync === false || !window.habitCloud) return;
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(() => window.habitCloud.save(JSON.parse(JSON.stringify(state))), 350);
+  // Send each completed action straight away. Delaying this lets an older cloud
+  // snapshot briefly overwrite a check that the person has just unticked.
+  window.habitCloud.save(JSON.parse(JSON.stringify(state)));
 }
 function daysInMonth() { const [y, m] = state.month.split("-").map(Number); return new Date(y, m, 0).getDate(); }
 function daysInMonthFor(month) { const [y, m] = month.split("-").map(Number); return new Date(y, m, 0).getDate(); }
 function dateKey(day) { return `${state.month}-${String(day).padStart(2, "0")}`; }
+function currentDateKey() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
 function weekOf(day) { return Math.ceil(day / 7); }
 function formatMonth() { return new Date(`${state.month}-02T12:00:00`).toLocaleString("en-US", { month: "long", year: "numeric" }); }
 function completionForHabit(habit) { return Array.from({ length: daysInMonth() }, (_, i) => Boolean(state.entries[`${habit.id}:${dateKey(i + 1)}`])).filter(Boolean).length; }
@@ -146,11 +150,15 @@ function renderAnalysis() {
   $("#topHabits").innerHTML = sorted.slice(0, 10).map(h => `<li><span>${escapeHtml(h.name)} ${escapeHtml(h.icon)}</span><strong>${h.percent}%</strong></li>`).join("") || "<li><span>No habits yet</span></li>";
 }
 function renderRatings() {
-  const selectedDate = new Date().getFullYear() === Number(state.month.slice(0,4)) && new Date().getMonth() + 1 === Number(state.month.slice(5,7)) ? dateKey(new Date().getDate()) : null;
-  const current = selectedDate ? state.checkins[selectedDate] || {} : {};
+  const current = state.checkins[currentDateKey()] || {};
   renderRating("mood", current.mood); renderRating("motivation", current.motivation);
   $("#moodValue").textContent = current.mood ? MOOD_RATINGS[current.mood - 1].emoji : "—";
   $("#motivationValue").textContent = current.motivation ? MOTIVATION_RATINGS[current.motivation - 1].emoji : "—";
+  const selections = [
+    current.mood && `Mood: ${MOOD_RATINGS[current.mood - 1].emoji} ${MOOD_RATINGS[current.mood - 1].label}`,
+    current.motivation && `Motivation: ${MOTIVATION_RATINGS[current.motivation - 1].emoji} ${MOTIVATION_RATINGS[current.motivation - 1].label}`
+  ].filter(Boolean);
+  $("#checkinSummary").textContent = selections.length ? `Saved today — ${selections.join(" · ")}` : "No mood or motivation saved for today yet.";
 }
 function renderRating(type, value) {
   const ratings = type === "mood" ? MOOD_RATINGS : MOTIVATION_RATINGS;
@@ -191,7 +199,7 @@ document.addEventListener("click", (event) => {
   if (chartView) { activeChartView = chartView.dataset.chartView; renderActivityChart(); return; }
   if (target.closest("#undoDelete")) { undoDelete(); return; }
   if (target.matches("[data-habit]")) { const key = `${target.dataset.habit}:${dateKey(Number(target.dataset.day))}`; if (target.checked) state.entries[key] = true; else delete state.entries[key]; saveState(); renderCharts(); renderAnalysis(); return; }
-  if (target.matches("[data-rating]")) { const today = dateKey(new Date().getDate()); state.checkins[today] = { ...(state.checkins[today] || {}), [target.dataset.rating]: Number(target.dataset.value) }; saveState(); renderRatings(); return; }
+  if (target.matches("[data-rating]")) { const today = currentDateKey(); state.checkins[today] = { ...(state.checkins[today] || {}), [target.dataset.rating]: Number(target.dataset.value) }; saveState(); renderRatings(); return; }
   const edit = target.closest("[data-edit]"); if (edit) { openHabitDialog(edit.dataset.edit); return; }
   const remove = target.closest("[data-delete]"); if (remove) deleteHabit(remove.dataset.delete);
 });
