@@ -2,9 +2,40 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return signedIn()
+        && request.auth.token.email == 'pranjalchakma3@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function isApproved(userId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/members/$(userId))
+        && get(/databases/$(database)/documents/members/$(userId)).data.status == 'approved';
+    }
+
     match /users/{userId} {
-      allow read, create, update, delete: if request.auth != null
-        && request.auth.uid == userId;
+      allow read, create, update, delete: if isOwner() || (request.auth.uid == userId && isApproved(userId));
+    }
+
+    match /accessRequests/{userId} {
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow get: if signedIn() && (request.auth.uid == userId || isOwner());
+      allow list: if isOwner();
+      allow update, delete: if isOwner();
+    }
+
+    match /members/{userId} {
+      allow get: if signedIn() && (request.auth.uid == userId || isOwner());
+      allow list: if isOwner();
+      allow create, update, delete: if isOwner();
     }
   }
 }
