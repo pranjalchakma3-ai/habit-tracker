@@ -161,7 +161,9 @@ window.habitCloud = {
     setSyncStatus("Syncing…", "busy");
     saveSequence = saveSequence
       .catch(() => undefined)
-      .then(() => setDoc(userDocument, { state: nextState, version: 1, updatedAt: serverTimestamp() }, { merge: true }))
+      // Replace the complete tracker snapshot so removed checks stay removed.
+      // A merge would keep deleted keys inside state.entries in Firestore.
+      .then(() => setDoc(userDocument, { state: nextState, version: 1, updatedAt: serverTimestamp() }))
       .then(() => setSyncStatus("Synced", "ready"))
       .catch(error => {
         console.error("Habit save failed", error);
