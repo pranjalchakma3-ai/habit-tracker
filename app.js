@@ -160,11 +160,38 @@ function renderRatings() {
   ].filter(Boolean);
   $("#checkinSummary").textContent = selections.length ? `Saved today — ${selections.join(" · ")}` : "No mood or motivation saved for today yet.";
 }
+function recentCheckinDays() {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - 6 + index);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    return { key, isToday: index === 6, label: date.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 2), fullLabel: date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) };
+  });
+}
+function averageScore(values) {
+  const scored = values.filter(Boolean);
+  return scored.length ? scored.reduce((sum, value) => sum + value, 0) / scored.length : 0;
+}
+function renderWellbeing() {
+  const days = recentCheckinDays();
+  const moodValues = days.map(day => state.checkins[day.key]?.mood || 0);
+  const motivationValues = days.map(day => state.checkins[day.key]?.motivation || 0);
+  const moodAverage = averageScore(moodValues), motivationAverage = averageScore(motivationValues);
+  const stat = (label, icon, average, kind) => `<div class="wellbeing-stat"><div><span>${icon} ${label}</span><strong>${average ? `${average.toFixed(1)}/5` : "—"}</strong></div><div class="wellbeing-track"><i class="${kind}" style="--progress:${average * 20}%"></i></div></div>`;
+  $("#wellbeingStats").innerHTML = `${stat("Mood", "🙂", moodAverage, "mood")}${stat("Motivation", "🔥", motivationAverage, "motivation")}`;
+  $("#wellbeingChart").innerHTML = days.map((day, index) => {
+    const mood = moodValues[index], motivation = motivationValues[index];
+    const details = [mood && `Mood ${mood}/5`, motivation && `Motivation ${motivation}/5`].filter(Boolean).join(" · ") || "No check-in";
+    return `<div class="wellbeing-day ${day.isToday ? "is-today" : ""}" title="${day.fullLabel}: ${details}"><div class="wellbeing-columns"><i class="mood ${mood ? "has-score" : ""}" style="--score:${mood * 20}%"></i><i class="motivation ${motivation ? "has-score" : ""}" style="--score:${motivation * 20}%"></i></div><span>${day.label}</span></div>`;
+  }).join("");
+}
 function renderRating(type, value) {
   const ratings = type === "mood" ? MOOD_RATINGS : MOTIVATION_RATINGS;
   $(`#${type}Choices`).innerHTML = ratings.map((rating, index) => `<button data-rating="${type}" data-value="${index + 1}" class="${value === index + 1 ? "active" : ""}" title="${rating.label}" aria-label="${rating.label} ${type}">${rating.emoji}</button>`).join("");
 }
-function render() { $("#monthPicker").value = state.month; $("#monthTitle").textContent = formatMonth(); renderHabits(); renderTracker(); renderCharts(); renderAnalysis(); renderRatings(); }
+function render() { $("#monthPicker").value = state.month; $("#monthTitle").textContent = formatMonth(); renderHabits(); renderTracker(); renderCharts(); renderAnalysis(); renderRatings(); renderWellbeing(); }
 function changeMonth(offset) { const [year, month] = state.month.split("-").map(Number); state.month = new Date(year, month - 1 + offset, 1).toISOString().slice(0, 7); saveState(); render(); }
 function escapeHtml(value = "") { const div = document.createElement("div"); div.textContent = value; return div.innerHTML; }
 function hideUndoToast() { $("#undoToast").classList.remove("visible"); }
@@ -199,7 +226,7 @@ document.addEventListener("click", (event) => {
   if (chartView) { activeChartView = chartView.dataset.chartView; renderActivityChart(); return; }
   if (target.closest("#undoDelete")) { undoDelete(); return; }
   if (target.matches("[data-habit]")) { const key = `${target.dataset.habit}:${dateKey(Number(target.dataset.day))}`; if (target.checked) state.entries[key] = true; else delete state.entries[key]; saveState(); renderCharts(); renderAnalysis(); return; }
-  if (target.matches("[data-rating]")) { const today = currentDateKey(); state.checkins[today] = { ...(state.checkins[today] || {}), [target.dataset.rating]: Number(target.dataset.value) }; saveState(); renderRatings(); return; }
+  if (target.matches("[data-rating]")) { const today = currentDateKey(); state.checkins[today] = { ...(state.checkins[today] || {}), [target.dataset.rating]: Number(target.dataset.value) }; saveState(); renderRatings(); renderWellbeing(); return; }
   const edit = target.closest("[data-edit]"); if (edit) { openHabitDialog(edit.dataset.edit); return; }
   const remove = target.closest("[data-delete]"); if (remove) deleteHabit(remove.dataset.delete);
 });
