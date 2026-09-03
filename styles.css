@@ -309,6 +309,7 @@ input[type="month"] { width: 100%; border: 1px solid var(--line); border-radius:
 .rating-choices button:hover { border-color: rgba(22,133,121,.24); background: #e9f5f0; transform: translateY(-2px) scale(1.05); filter: none; }
 .rating-choices button.active { border-color: rgba(22,133,121,.25); background: var(--accent-soft); box-shadow: 0 4px 10px rgba(22,133,121,.14); transform: scale(1.06); filter: none; }
 .checkin-note { margin: 11px 0 0; color: var(--ink-soft); font-size: .65rem; line-height: 1.45; }
+.checkin-summary { margin: 7px 0 0; color: var(--accent-deep); font-size: .64rem; font-weight: 750; }
 .analysis-list { display: grid; gap: 8px; margin-top: 13px; }
 .analysis-row { display: grid; grid-template-columns: minmax(92px, 1fr) 39px 1.4fr; align-items: center; gap: 9px; font-size: .66rem; }
 .analysis-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
