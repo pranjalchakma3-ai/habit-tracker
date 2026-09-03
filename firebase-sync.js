@@ -63,6 +63,7 @@ let currentUser = null;
 let userDocument = null;
 let unsubscribeDocument = null;
 let saveSequence = Promise.resolve();
+let pendingStateJson = null;
 
 function readLocalState() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
@@ -112,6 +113,25 @@ function broadcastState(nextState) {
   window.dispatchEvent(new CustomEvent("habit-cloud-state", { detail: { state: nextState } }));
 }
 
+function stateJson(nextState) {
+  if (Array.isArray(nextState)) return `[${nextState.map(stateJson).join(",")}]`;
+  if (nextState && typeof nextState === "object") {
+    return `{${Object.keys(nextState).sort().map(key => `${JSON.stringify(key)}:${stateJson(nextState[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(nextState);
+}
+
+function applyCloudState(nextState) {
+  const incomingStateJson = stateJson(nextState);
+  // A listener can receive an older snapshot while a new local action is
+  // being uploaded. Keep the latest action visible until its matching cloud
+  // snapshot arrives.
+  if (pendingStateJson && incomingStateJson !== pendingStateJson) return false;
+  if (pendingStateJson === incomingStateJson) pendingStateJson = null;
+  broadcastState(nextState);
+  return true;
+}
+
 async function connectUser(user) {
   currentUser = user;
   userDocument = doc(db, "users", user.uid);
@@ -121,7 +141,7 @@ async function connectUser(user) {
   const snapshot = await getDoc(userDocument);
   if (snapshot.exists() && snapshot.data()?.state) {
     localStorage.setItem(OWNER_KEY, user.uid);
-    broadcastState(snapshot.data().state);
+    applyCloudState(snapshot.data().state);
   } else {
     const localState = readLocalState() || window.getHabitTrackerState?.();
     if (localState) {
@@ -133,7 +153,7 @@ async function connectUser(user) {
 
   unsubscribeDocument?.();
   unsubscribeDocument = onSnapshot(userDocument, snapshotUpdate => {
-    if (snapshotUpdate.exists() && snapshotUpdate.data()?.state) broadcastState(snapshotUpdate.data().state);
+    if (snapshotUpdate.exists() && snapshotUpdate.data()?.state) applyCloudState(snapshotUpdate.data().state);
     setSyncStatus(snapshotUpdate.metadata.fromCache ? "Offline copy" : "Synced", snapshotUpdate.metadata.fromCache ? "offline" : "ready");
   }, error => {
     console.error("Habit sync failed", error);
@@ -158,6 +178,7 @@ async function beginGoogleSignIn() {
 window.habitCloud = {
   save(nextState) {
     if (!currentUser || !userDocument) return Promise.resolve();
+    pendingStateJson = stateJson(nextState);
     setSyncStatus("Syncing…", "busy");
     saveSequence = saveSequence
       .catch(() => undefined)
