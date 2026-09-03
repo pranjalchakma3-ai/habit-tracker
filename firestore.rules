@@ -8,8 +8,7 @@ service cloud.firestore {
 
     function isOwner() {
       return signedIn()
-        && request.auth.token.email == 'pranjalchakma3@gmail.com'
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email == 'pranjalchakma3@gmail.com';
     }
 
     function isApproved(userId) {
