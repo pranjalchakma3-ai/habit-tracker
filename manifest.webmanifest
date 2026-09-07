@@ -1,7 +1,7 @@
 {
-  "name": "Habit Tracker",
-  "short_name": "Habits",
-  "description": "A simple, private habit tracker that keeps your data on your device.",
+  "name": "Habit & Calories Tracker",
+  "short_name": "My Tracker",
+  "description": "A private habit, meal, water, and weight tracker that syncs across your devices.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
