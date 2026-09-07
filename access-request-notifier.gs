@@ -2,7 +2,7 @@ const FIREBASE_API_KEY = "AIzaSyCYbXTprIV6Wkvnua50bGltWCtOOE1XfXc";
 const FIREBASE_PROJECT_ID = "habit-tracker-sync-c7fc8";
 const OWNER_EMAIL = "pranjalchakma3@gmail.com";
 const APP_URL = "https://habit-tracker-sync-c7fc8.firebaseapp.com/";
-const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
+const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite";
 
 const NUTRITION_SCHEMA = {
   type: "OBJECT",
@@ -57,8 +57,13 @@ class GeminiProvider extends AIProvider {
       muteHttpExceptions: true
     });
     const status = response.getResponseCode();
+    let providerError = {};
+    try { providerError = JSON.parse(response.getContentText()).error || {}; } catch (error) {}
+    const providerMessage = String(providerError.message || "").toLowerCase();
     if (status === 429) throw apiError("RATE_LIMITED", "AI analysis is temporarily unavailable because the API limit has been reached.");
-    if (status === 400 || status === 404) throw apiError("BAD_MODEL", "The configured Gemini model is unavailable.");
+    if (status === 404) throw apiError("BAD_MODEL", "The configured Gemini model is unavailable.");
+    if ([400, 401, 403].indexOf(status) >= 0 && /api key|credential|permission|authentication/.test(providerMessage)) throw apiError("NOT_CONFIGURED", "The Gemini API key is missing or invalid.");
+    if (status === 400) throw apiError("PROVIDER_ERROR", "Gemini rejected the nutrition request. Please try again.");
     if (status === 401 || status === 403) throw apiError("NOT_CONFIGURED", "The Gemini API key is missing or invalid.");
     if (status < 200 || status >= 300) throw apiError("PROVIDER_ERROR", "Gemini is temporarily unavailable.");
     const result = JSON.parse(response.getContentText());
@@ -93,7 +98,10 @@ function doPost(event) {
     if (!handlers[action]) throw apiError("BAD_REQUEST", "Unknown AI action.");
     return json({ ok: true, data: handlers[action]() });
   } catch (error) {
-    console.error(error);
+    console.error(JSON.stringify({
+      code: error && error.code || "UNKNOWN",
+      message: error && error.publicMessage || "AI nutrition request failed."
+    }));
     return json({ ok: false, code: error.code || "UNKNOWN", message: error.publicMessage || "AI nutrition is temporarily unavailable." });
   }
 }
