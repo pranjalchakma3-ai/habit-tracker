@@ -43,16 +43,18 @@ To add OpenAI later, create `OpenAIProvider` in the Apps Script implementing `an
 ```text
 AI_PROVIDER = gemini
 GEMINI_API_KEY = your_key_from_google_ai_studio
-GEMINI_MODEL = gemini-2.5-flash-lite
+GEMINI_MODEL = gemini-3.5-flash-lite
 ```
 
-`gemini-2.5-flash-lite` is a stable, budget-friendly multimodal model. The model is configurable, so it can be upgraded without changing the app.
+`gemini-3.5-flash-lite` is a stable, free-tier-capable multimodal model. The model is configurable, so it can be upgraded without changing the app.
 
 5. Replace the Apps Script source with `access-request-notifier.gs` from this repository.
 6. Choose **Deploy → Manage deployments → Edit**, select **New version**, keep **Execute as: Me** and **Who has access: Anyone**, then deploy.
 7. Do not change the deployment URL. The website already points to the existing endpoint.
 
 The endpoint verifies the Firebase sign-in token, permits only the owner or approved members, and limits each account to 30 AI requests per hour. The Gemini key stays in Script Properties and is never returned to the browser.
+
+Never place the key in a local `.env` file for this static frontend. Common `.env`, service-account, and Firebase debug files are ignored by Git as a defense-in-depth safeguard, but the only supported key location is **Apps Script → Project Settings → Script Properties**.
 
 ## Confirm the AI connection
 
