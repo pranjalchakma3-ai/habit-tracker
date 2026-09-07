@@ -47,8 +47,8 @@ function importGitHubTrackerState() {
 
 importGitHubTrackerState();
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
@@ -130,6 +130,7 @@ function showSignedOut() {
     localStorage.removeItem(STORAGE_KEY);
     window.dispatchEvent(new CustomEvent("habit-cloud-state", { detail: { reset: true } }));
   }
+  window.dispatchEvent(new CustomEvent("health-auth-changed", { detail: { user: null, authorized: false } }));
 }
 
 function showSignedIn(user) {
@@ -140,6 +141,7 @@ function showSignedIn(user) {
   userAvatar.src = user.photoURL || "habit-tracker-icon.svg";
   userAvatar.alt = user.displayName ? `${user.displayName}'s profile photo` : "Profile photo";
   storageNote.textContent = "Choose a score for today. Changes sync automatically across your devices.";
+  window.dispatchEvent(new CustomEvent("health-auth-changed", { detail: { user, authorized: true } }));
 }
 
 function showAccessRequest(status, user) {
@@ -163,6 +165,7 @@ function showAccessRequest(status, user) {
     requestAccessButton.hidden = false;
     requestAccessButton.disabled = false;
   }
+  window.dispatchEvent(new CustomEvent("health-auth-changed", { detail: { user, authorized: false } }));
 }
 
 function broadcastState(nextState) {
@@ -271,7 +274,7 @@ async function sendAccessRequest() {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ action: "accessRequest", idToken })
       });
     }
     showAccessRequest("pending", currentUser);
@@ -331,6 +334,12 @@ window.habitCloud = {
       });
     return saveSequence;
   }
+};
+
+window.healthAuth = {
+  get currentUser() { return currentUser; },
+  get authorized() { return Boolean(currentUser && userDocument); },
+  getIdToken() { return currentUser?.getIdToken() || Promise.reject(new Error("Sign in is required.")); }
 };
 
 googleSignIn.addEventListener("click", beginGoogleSignIn);
