@@ -8,6 +8,8 @@
       "firebase.json",
       "firestore.rules",
       "access-request-notifier.gs",
+      "CALORIES_TRACKER_SETUP.md",
+      "tests/**",
       ".firebaserc",
       ".git",
       ".git/**",
