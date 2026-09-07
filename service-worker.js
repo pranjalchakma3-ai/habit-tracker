@@ -1,5 +1,5 @@
-const CACHE_NAME = "habit-tracker-v13";
-const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./firebase-sync.js", "./manifest.webmanifest", "./habit-tracker-icon.svg"];
+const CACHE_NAME = "habit-tracker-v14";
+const APP_SHELL = ["./", "./index.html", "./styles.css", "./calories.css", "./app.js", "./firebase-sync.js", "./nutrition-calculations.js", "./nutrition-data.js", "./nutrition-ai.js", "./calories.js", "./manifest.webmanifest", "./habit-tracker-icon.svg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
