@@ -443,7 +443,9 @@ async function saveQuickMeal(form) {
 
 async function addMealCopy(item, date = selectedDate) {
   await repository.save("mealLogs", { ...item, id: id("meal"), date, time: new Date().toTimeString().slice(0, 5), inputMethod: "repeat", createdAtLocal: new Date().toISOString() });
-  document.querySelector("#foodDialog").close(); showToast("Meal added again."); renderNutrition();
+  const dialog = document.querySelector("#foodDialog");
+  if (dialog.open) dialog.close();
+  showToast("Meal added again."); renderNutrition();
 }
 
 function capitalize(value) { return String(value).charAt(0).toUpperCase() + String(value).slice(1); }
