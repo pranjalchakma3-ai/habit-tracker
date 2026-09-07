@@ -21,6 +21,7 @@
     <link rel="icon" href="habit-tracker-icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="habit-tracker-icon.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="calories.css" />
   </head>
   <body class="auth-pending">
     <section id="authGate" class="auth-gate" aria-labelledby="authTitle">
@@ -47,7 +48,14 @@
         </div>
       </div>
     </section>
-    <main class="app-shell">
+    <nav id="moduleNav" class="module-nav" aria-label="Main app navigation">
+      <button type="button" data-module="habits" class="active"><span aria-hidden="true">✓</span><b>Habits</b></button>
+      <button type="button" data-module="calories"><span aria-hidden="true">◉</span><b>Calories</b></button>
+      <button type="button" data-module="planner"><span aria-hidden="true">▦</span><b>Planner</b></button>
+      <button type="button" data-module="progress"><span aria-hidden="true">↗</span><b>Progress</b></button>
+      <button type="button" data-module="nutrition-settings"><span aria-hidden="true">⚙</span><b>Settings</b></button>
+    </nav>
+    <main id="habitModule" class="app-shell module-view">
       <aside class="sidebar">
         <section class="brand-card">
           <p class="eyebrow">PERSONAL DASHBOARD</p>
@@ -150,6 +158,7 @@
         </section>
       </section>
     </main>
+    <main id="caloriesModule" class="calories-shell module-view" hidden aria-live="polite"></main>
     <dialog id="habitDialog">
       <form id="habitForm">
         <div class="dialog-heading"><h2 id="dialogTitle">New habit</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
@@ -167,6 +176,7 @@
       <button id="undoDelete" type="button">Undo</button>
     </div>
     <script type="module" src="firebase-sync.js"></script>
+    <script type="module" src="calories.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
