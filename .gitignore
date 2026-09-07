@@ -1,0 +1,21 @@
+# Local environment and secret files
+.env
+.env.*
+!.env.example
+*.env
+*.secret
+*.secrets
+
+# Firebase and Google local credentials
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+service-account*.json
+*service-account*.json
+application_default_credentials.json
+
+# Common local files
+.DS_Store
+node_modules/
+
