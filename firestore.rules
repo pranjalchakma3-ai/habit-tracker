@@ -19,6 +19,10 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read, create, update, delete: if isOwner() || (request.auth.uid == userId && isApproved(userId));
+
+      match /{document=**} {
+        allow read, create, update, delete: if isOwner() || (request.auth.uid == userId && isApproved(userId));
+      }
     }
 
     match /accessRequests/{userId} {
