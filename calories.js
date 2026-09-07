@@ -100,7 +100,7 @@ async function connectNutrition(user) {
   repository.addEventListener("change", event => { nutrition = event.detail.state; if (activeModule !== "habits") renderNutrition(); });
   renderNutrition();
   repository.sync().catch(() => showToast("Using your offline nutrition copy.", "info"));
-  aiNutritionService.status().then(status => { aiStatus = status; if (activeModule === "nutrition-settings") renderNutrition(); }).catch(error => { aiStatus = { configured: false, provider: "Unavailable", model: "Unavailable", message: error.message }; });
+  aiNutritionService.status().then(status => { aiStatus = status || { configured: false, provider: "Not configured", model: "Not configured" }; if (activeModule === "nutrition-settings") renderNutrition(); }).catch(error => { aiStatus = { configured: false, provider: "Unavailable", model: "Unavailable", message: error.message }; });
 }
 
 function disconnectNutrition() {
